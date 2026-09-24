@@ -31,6 +31,7 @@ import dev.demeng.pluginbase.Events;
 import dev.demeng.pluginbase.terminable.TerminableConsumer;
 import dev.demeng.pluginbase.terminable.module.TerminableModule;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
@@ -38,6 +39,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 
@@ -101,5 +103,17 @@ public class ButtonListener implements TerminableModule {
     Events.subscribe(PlayerQuitEvent.class, EventPriority.MONITOR)
         .handler(e -> lastInteracted.remove(e.getPlayer()))
         .bindWith(consumer);
+
+    Events.subscribe(WorldLoadEvent.class)
+            .handler(worldLoadEvent -> {
+                // Use a copy of the collection, as the map is being modified during iteration
+                for (CommandButton button : List.copyOf(i.getButtonsManager().getButtons().values())){
+                    // If any of the button's locations have had their world unloaded, reload the button
+                    if (button.getLocations().stream().anyMatch(loc -> !loc.isWorldLoaded())) {
+                        i.getButtonsManager().reloadButton(button);
+                    }
+                }
+            })
+            .bindWith(consumer);
   }
 }

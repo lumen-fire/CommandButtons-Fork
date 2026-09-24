@@ -164,4 +164,13 @@ public class ButtonsManager {
   public Map<String, CommandButton> getButtons() {
     return Collections.unmodifiableMap(buttons);
   }
+
+  /**
+   * Reload a command button from config
+   *
+   * @param button The button to reload
+   */
+  public void reloadButton(CommandButton button){
+    buttons.put(button.getId(), CommandButton.fromConfig(button.getId()));
+  }
 }
